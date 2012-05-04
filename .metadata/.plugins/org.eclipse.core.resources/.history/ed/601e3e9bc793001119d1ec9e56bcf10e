@@ -1,0 +1,14 @@
+
+public class Main {
+	public static void main(String[] args){
+		if(args[0].equals("-cl")){//combine legacy
+			int num_patchs = (args.length - 1);
+			
+		}
+	}
+	
+	
+	public static void combine_legacy(int num, String[] patchs){
+		byte[][] patch_array = new byte[num][];
+	}
+}
