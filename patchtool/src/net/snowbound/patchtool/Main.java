@@ -10,7 +10,6 @@ package net.snowbound.patchtool;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,19 +41,19 @@ public class Main {
 	
 	public static void combine_legacy(int num, String[] patches) throws IOException{
 		byte[][] patch_array = new byte[num][];
-		int final_size = 0;
-		int header = (6 +(num * 4));
+		//int final_size = 0;
+		//int header = (6 +(num * 4));
 		for(int i = 0; i < num; i++){
 			try {
 				patch_array[i] = readPatch(i, patches);
-				final_size += patch_array[i].length;
+				//final_size += patch_array[i].length;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		
-		final_size += header;
+		//final_size += header;
 		File out = new File("patch.mod");
 		out.delete();
 		OutputStream os= new FileOutputStream(out);
