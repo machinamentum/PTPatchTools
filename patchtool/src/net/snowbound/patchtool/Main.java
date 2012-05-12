@@ -88,7 +88,7 @@ public class Main {
 			int temp = headerSize;
 			byte[] data = new byte[4];
 			if(i == 0){
-				bloat += patchData[i].length;
+				bloat += patchData[i].length - 5;
 				data = intToByteArray(temp);
 				ret[i * 4] = data[0];
 				ret[(i * 4) + 1] = data[1];
@@ -101,7 +101,7 @@ public class Main {
 				ret[(i * 4) + 1] = data[1];
 				ret[(i * 4) + 2] = data[2];
 				ret[(i * 4) + 3] = data[3];
-				bloat += patchData[i].length;
+				bloat += patchData[i].length - 5;
 			}
 		}
 		
