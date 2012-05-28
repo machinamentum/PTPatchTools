@@ -1,4 +1,4 @@
-package net.snowbound.patchtool;
+package com.joshuahuelsman.patchtool;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -141,7 +141,7 @@ public class Main {
 	public static void sendViaADB(String patch) {
 		try {
 			String line;
-			Process p = Runtime.getRuntime().exec("./adb push " + patch + " /mnt/sdcard");
+			Process p = Runtime.getRuntime().exec("adb push " + patch + " /mnt/sdcard");
 			BufferedReader bri = new BufferedReader(new InputStreamReader(
 					p.getInputStream()));
 			BufferedReader bre = new BufferedReader(new InputStreamReader(
