@@ -8,8 +8,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 public class Main {
+	//Default IP patch by Intyre of the Minecraft Forums (slightly modified)
+	public static byte[] defaultip = {
+		(byte) 0xFF, 0x50, 0x54, 0x50, (byte) 0xBF, 0x01, 0x00,
+		0x00, 0x00, 0x0A, 0x00, 0x17, (byte) 0xBB, 0x24, 
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+	};
 	public static void main(String[] args) {
 		if (args.length == 0) {
 
@@ -30,6 +38,13 @@ public class Main {
 			}
 		}else if(args[0].equals("-s")){
 			sendViaADB(args[1]);
+		}else if(args[0].equals("-ip")){
+			try {
+				generateIPPatch(args[1]);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -163,5 +178,14 @@ public class Main {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public static void generateIPPatch(String ip) throws IOException{
+		OutputStream out = new FileOutputStream(new File("patch.mod"));
+		ByteBuffer buf = ByteBuffer.wrap(defaultip);
+		buf.position(14);
+		buf.put(ip.getBytes());
+		out.write(buf.array());
+		out.close();
 	}
 }
