@@ -45,6 +45,14 @@ public class Main {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}else if(args[0].equals("diff")){
+			try {
+				diff(args[1], args[2]);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		}
 	}
 
@@ -116,7 +124,41 @@ public class Main {
 				bloat += patchData[i].length - 5;
 			}
 		}
+		
+		
+		
+		return ret;
+	}
+	
+	public static byte[] generateIndices(byte[][] patchData) {
+		byte[] ret = new byte[patchData.length * 4];
+		int headerSize = (6 + (patchData.length * 4));
 
+		int bloat = 0;
+
+		for (int i = 0; i < patchData.length; i++) {
+			int temp = headerSize;
+			byte[] data = new byte[4];
+			if (i == 0) {
+				bloat += patchData[i].length;
+				data = intToByteArray(temp);
+				ret[i * 4] = data[0];
+				ret[(i * 4) + 1] = data[1];
+				ret[(i * 4) + 2] = data[2];
+				ret[(i * 4) + 3] = data[3];
+			} else {
+				temp += bloat;
+				data = intToByteArray(temp);
+				ret[i * 4] = data[0];
+				ret[(i * 4) + 1] = data[1];
+				ret[(i * 4) + 2] = data[2];
+				ret[(i * 4) + 3] = data[3];
+				bloat += patchData[i].length;
+			}
+		}
+		
+		
+		
 		return ret;
 	}
 
@@ -147,7 +189,16 @@ public class Main {
 		is.close();
 		return ret;
 	}
-
+	
+	public static byte[] readPatch(String patch)
+			throws IOException {
+		File patchf = new File(patch);
+		byte[] ret = new byte[(int) patchf.length()];
+		InputStream is = new FileInputStream(patch);
+		is.read(ret, 0, ret.length);
+		is.close();
+		return ret;
+	}
 	public static final byte[] intToByteArray(int value) {
 		return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16),
 				(byte) (value >>> 8), (byte) value };
@@ -188,4 +239,89 @@ public class Main {
 		out.write(buf.array());
 		out.close();
 	}
+	
+	
+	public static void diff(String oldf, String newf) throws IOException{
+		byte[] oldData = readPatch(oldf);
+		byte[] newData = readPatch(newf);
+		
+		if(oldData.length != newData.length){
+			System.out.println("Error: The new file's length does not match the old file's length. Aborting...");
+			return;
+		}
+		File out = new File("patch.mod");
+		out.delete();
+		OutputStream os = new FileOutputStream(out);
+		writeMagic(os);
+		writeVersionCode(0, os);
+		
+		byte[][] patchData;
+		
+		int numPatches = 0;
+		for(int i = 0; i < oldData.length; i++){
+			if(oldData[i] != newData[i]){
+				numPatches++;
+				while(oldData[i] != newData[i]){
+					i++;
+				}
+				
+			}
+		}
+		System.out.println("Number of Patches: " + numPatches);
+		writeNumberPatches(numPatches, os);
+		patchData = new byte[numPatches][];
+		int index = 0;
+		int[] address = new int[numPatches];
+		for(int i2 = 0; i2 < numPatches; i2++){
+			for(int i = index; i < oldData.length; i++){
+				if(oldData[i] != newData[i]){
+					address[i2] = i;
+					int i3 = 0;
+					while(oldData[i] != newData[i]){
+						i++;
+						i3++;
+					}
+					patchData[i2] = new byte[i3 + 4];
+					System.out.println("Length of patch " + i2 + ": " + (i3 + 4));
+					index = i;
+					
+					break;
+				}
+			}
+		}
+		
+		index = 0;
+		for(int i2 = 0; i2 < numPatches; i2++){
+			
+			for(int i = index; i < oldData.length; i++){
+				if(oldData[i] != newData[i]){
+					
+					byte[] addr = intToByteArray(i);
+					patchData[i2][0] = addr[0];
+					patchData[i2][1] = addr[1];
+					patchData[i2][2] = addr[2];
+					patchData[i2][3] = addr[3];
+					while(oldData[i] != newData[i]){
+						i++;
+					}
+					index = i;
+					break;
+				}
+			}
+		}
+		
+		for(int i2 = 0; i2 < numPatches; i2++){
+			for(int i = 0; i < (patchData[i2].length - 4); i++){
+				patchData[i2][i + 4] = newData[address[i2] + i];
+			}
+		}
+		
+		os.write((generateIndices(patchData)));
+		for(int i = 0; i < numPatches; i++){
+			os.write(patchData[i]);
+		}
+		os.close();
+		
+	}
+
 }
