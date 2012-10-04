@@ -20,7 +20,8 @@ public class Main {
 	};
 	public static void main(String[] args) {
 		if (args.length == 0) {
-
+			System.out.println("PTPatchTool: a tool to manipulate the PTPatch format");
+			System.out.println("Visit http://www.minecraftforum.net/topic/1112628-mod-patching/ for usage.");
 			return;
 		}
 		if (args[0].equals("-cl")) {// combine legacy
@@ -53,6 +54,14 @@ public class Main {
 				e.printStackTrace();
 			}
 			
+		} else if (args[0].equals("patch")) {
+			try {
+				applyPatchTo(args[1], args[2]);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			System.err.println("Incorrect command line.");
 		}
 	}
 
@@ -238,6 +247,21 @@ public class Main {
 		buf.put(ip.getBytes());
 		out.write(buf.array());
 		out.close();
+	}
+
+	public static void applyPatchTo(String fileLoc, String patchLoc) throws IOException {
+		PTPatch patch = new PTPatch(patchLoc);
+		patch.loadPatch();
+		System.out.println(patchLoc + ": Minecraft version: " + Integer.toString(patch.mHeader.minecraft_ver, 16));
+		System.out.println("Number of locations in patch: " + patch.mHeader.num_patches);
+		if (!patch.checkMagic()) {
+			System.err.println("Magic error!");
+			return;
+		}
+		System.out.println("Magic OK.");
+		File file = new File(fileLoc);
+		patch.applyPatch(file);
+		System.out.println("Done patching.");
 	}
 	
 	
