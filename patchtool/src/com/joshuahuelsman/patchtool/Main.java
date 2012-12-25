@@ -12,6 +12,7 @@ import java.nio.ByteBuffer;
 
 public class Main {
 	//Default IP patch by Intyre of the Minecraft Forums (slightly modified)
+	//Deprecated. Do not use for future use.
 	public static byte[] defaultip = {
 		(byte) 0xFF, 0x50, 0x54, 0x50, (byte) 0xBF, 0x01, 0x00,
 		0x00, 0x00, 0x0A, 0x00, 0x17, (byte) 0xBB, 0x24, 
