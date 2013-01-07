@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 public class Main {
 	//Default IP patch by Intyre of the Minecraft Forums (slightly modified)
@@ -49,7 +50,7 @@ public class Main {
 			}
 		}else if(args[0].equals("diff")){
 			try {
-				diff(args[1], args[2]);
+				diff(args[1], args[2], args.length <= 3? null: args[3].getBytes(Charset.forName("UTF-8")));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -140,9 +141,9 @@ public class Main {
 		return ret;
 	}
 	
-	public static byte[] generateIndices(byte[][] patchData) {
+	public static byte[] generateIndices(byte[][] patchData, int padding) {
 		byte[] ret = new byte[patchData.length * 4];
-		int headerSize = (6 + (patchData.length * 4));
+		int headerSize = (6 + (patchData.length * 4)) + padding;
 
 		int bloat = 0;
 
@@ -264,9 +265,8 @@ public class Main {
 		patch.applyPatch(file);
 		System.out.println("Done patching.");
 	}
-	
-	
-	public static void diff(String oldf, String newf) throws IOException{
+
+	public static void diff(String oldf, String newf, byte[] metaData) throws IOException{
 		byte[] oldData = readPatch(oldf);
 		byte[] newData = readPatch(newf);
 		
@@ -340,8 +340,10 @@ public class Main {
 				patchData[i2][i + 4] = newData[address[i2] + i];
 			}
 		}
-		
-		os.write((generateIndices(patchData)));
+
+		os.write((generateIndices(patchData, (metaData != null? metaData.length : 0))));
+		if (metaData != null) os.write(metaData);
+
 		for(int i = 0; i < numPatches; i++){
 			os.write(patchData[i]);
 		}
